@@ -28,13 +28,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+# decode de salida nativa como UTF-8 (evita mojibake tipo μs en informes)
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 
 $target = "http://${HostTarget}:${Puerto}/"
 $outDir = Join-Path $StagingDir "resultados"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $stamp   = Get-Date -Format "yyyyMMdd_HHmmss"
 $reporte = Join-Path $outDir "informe_$stamp.md"
-Anotar "# Informe de resistencia - $stamp"
 
 # ---------------------------------------------------------------- utilidades
 function Banner([string]$Titulo, [string]$Color = "Cyan") {
@@ -117,6 +119,7 @@ function Start-Objetivo {
 }
 
 # ------------------------------------------------------------ diagnostico
+Anotar "# Informe de resistencia - $stamp"
 Banner "DIAGNOSTICO" "Magenta"
 $herramientas = @("vegeta","k6","slowloris","nginx","curl")
 foreach ($h in $herramientas) {

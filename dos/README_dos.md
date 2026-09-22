@@ -101,6 +101,14 @@ sudo hping3 -S -p 8080 --flood 127.0.0.1   # SOLO localhost
 
 ## 6. Demo Windows sin Docker (nginx nativo + blindaje)
 
+> ⚙️ **Orquestador automático:** `test-resistencia.ps1` (mismo directorio) hace TODO esto solo: diagnostica herramientas, arranca el objetivo (Docker si puede, si no el demo nginx), lanza línea base → flood → slowloris, comprueba salud post-ataque y genera un informe Markdown en `<staging>\resultados\`. También incluye `script.js` para k6 (prueba escalonada).
+>
+> ```powershell
+> & .\test-resistencia.ps1              # demo nginx (8090) por defecto
+> & .\test-resistencia.ps1 -UsarDocker  # staging PHP+MariaDB (requiere engine Linux)
+> & .\test-resistencia.ps1 -SoloDiagnostico -PararAlFinal
+> ```
+
 Si (como pasa a veces) Docker Desktop no puede levantar el engine Linux porque **no hay WSL2**, puedes practicar igual con el nginx de Scoop sirviendo el staging + las mitigaciones del template:
 
 ```powershell

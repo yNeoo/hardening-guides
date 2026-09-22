@@ -99,4 +99,31 @@ sudo hping3 -S -p 8080 --flood 127.0.0.1   # SOLO localhost
 
 ---
 
+## 6. Demo Windows sin Docker (nginx nativo + blindaje)
+
+Si (como pasa a veces) Docker Desktop no puede levantar el engine Linux porque **no hay WSL2**, puedes practicar igual con el nginx de Scoop sirviendo el staging + las mitigaciones del template:
+
+```powershell
+scoop install nginx
+# crea C:\Users\zorro\Downloads\staging\nginx-test\conf\nginx.conf
+#   (root = web/ del staging, listen 8090, limit_req 20r/s burst=40, limit_conn 20)
+New-Item -ItemType Directory -Force -Path logs,temp | Out-Null
+Start-Process nginx -ArgumentList "-p","C:/Users/zorro/Downloads/staging/nginx-test/" -WindowStyle Hidden
+curl http://127.0.0.1:8090/     # → 200
+# ¡usa 127.0.0.1! (el resolver Go no resuelve "localhost" con DNS misconfigurado)
+
+# línea base (200s) y flood (429s — el blindaje frenando):
+echo "GET http://127.0.0.1:8090/" > targets.txt
+vegeta attack -targets=targets.txt -duration=8s -rate=1000 -workers=100 -output=flood.bin
+vegeta report flood.bin
+# slowloris:
+slowloris 127.0.0.1 -p 8090 -s 100 -ua
+# comprobar de nuevo: curl → sigue en 200 (ganaste la defensa)
+# parar nginx: nginx -p C:/Users/zorro/Downloads/staging/nginx-test/ -s stop
+```
+
+> 📌 `nginx-test/` incluye ya esta config lista para usar (raíz `staging/web`, puerto 8090, límites activos).
+
+---
+
 [⬅ Volver al inicio](README.md)
